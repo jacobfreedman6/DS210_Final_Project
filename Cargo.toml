@@ -1,0 +1,11 @@
+[package]
+name = "ds210_project"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ndarray-rand = "0.15"  # Compatible with ndarray 0.15
+rand = "0.9.1"           # Required by ndarray-rand
+csv = "1.1"
+ndarray = "0.16.1"
+approx = "0.5"
