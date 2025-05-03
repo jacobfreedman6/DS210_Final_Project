@@ -2,44 +2,9 @@ use ndarray::{Array2, s};
 use ndarray_rand::{RandomExt, rand_distr::Uniform};
 use rand::seq::SliceRandom;
 use std::error::Error;
-use csv::ReaderBuilder;
-
-fn load_data(path: &str) -> Result<(Array2<f32>, Vec<usize>), Box<dyn Error>> {
-    let mut rdr = ReaderBuilder::new()
-        .has_headers(true)
-        .from_path(path)?;
-    
-    let mut inputs = Vec::new();
-    let mut labels = Vec::new();
-
-    for result in rdr.records() {
-        let record = result?;
-
-        let feature_vals: Vec<f32> = record.iter()
-            .take(record.len() - 1)
-            .map(|v| v.parse::<f32>().unwrap())
-            .collect();
-
-        let label_str = &record[record.len() - 1];
-        let label = match label_str {
-            "WALKING" => 0,
-            "WALKING_UPSTAIRS" => 1,
-            "WALKING_DOWNSTAIRS" => 2,
-            "SITTING" => 3,
-            "STANDING" => 4,
-            "LAYING" => 5,
-            _ => panic!("Unknown label: '{}'", label_str),
-        };
-
-        inputs.extend_from_slice(&feature_vals);
-        labels.push(label);
-    }
-
-    let num_features = inputs.len() / labels.len();
-    let features = Array2::from_shape_vec((labels.len(), num_features), inputs)?;
-    Ok((features, labels))
-}
-
+mod data_loader;
+use data_loader::load_data;
+mod nn_tester;
 
 
 struct NeuralNetwork {
@@ -184,48 +149,3 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use ndarray::array;
-    use std::fs::File;
-    use std::io::Write;
-    use approx::assert_abs_diff_eq;
-
-    #[test]
-    fn test_load_data() -> Result<(), Box<dyn std::error::Error>> {
-        let tmp_path = "test_sample.csv";
-        let mut file = File::create(tmp_path)?;
-        writeln!(file, "f1,f2,f3,label")?;
-        writeln!(file, "1.0,2.0,3.0,WALKING")?;
-        writeln!(file, "4.0,5.0,6.0,SITTING")?;
-
-        let (features, labels) = load_data(tmp_path)?;
-        assert_eq!(features.shape(), &[2, 3]);
-        assert_eq!(labels, vec![0, 3]);
-
-        std::fs::remove_file(tmp_path)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_sigmoid_and_derivative() {
-        let x = array![[0.0, 1.0], [-1.0, 2.0]];
-        let sig = NeuralNetwork::sigmoid(&x);
-        let deriv = NeuralNetwork::sigmoid_derivative(&sig);
-
-        assert_abs_diff_eq!(sig[[0, 0]], 0.5, epsilon = 1e-6);
-        assert!(deriv.iter().all(|v| *v >= 0.0 && *v <= 0.25));
-    }
-
-    #[test]
-    fn test_forward_shape() {
-        let nn = NeuralNetwork::new(4, 5, 3, 2, 0.1);
-        let input = array![[0.1, 0.2, 0.3, 0.4]];
-        let (a1, a2, a3) = nn.forward(&input);
-
-        assert_eq!(a1.shape(), &[1, 5]);
-        assert_eq!(a2.shape(), &[1, 3]);
-        assert_eq!(a3.shape(), &[1, 2]);
-    }
-}
