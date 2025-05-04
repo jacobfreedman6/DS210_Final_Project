@@ -6,7 +6,11 @@ use std::io::Write;
 use approx::assert_abs_diff_eq;
 
 
+//Implement tests for various important functions throughout project
+
+
 #[test]
+//Test the function that loads in CSV data
 fn test_load_data() -> Result<(), Box<dyn std::error::Error>> {
    let tmp_path = "test_sample.csv";
    let mut file = File::create(tmp_path)?;
@@ -26,6 +30,7 @@ fn test_load_data() -> Result<(), Box<dyn std::error::Error>> {
 
 
 #[test]
+//Test crucial sigmoid function and its derivative
 fn test_sigmoid_and_derivative() {
    let x = array![[0.0, 1.0], [-1.0, 2.0]];
    let sig = NeuralNetwork::sigmoid(&x);
@@ -38,6 +43,7 @@ fn test_sigmoid_and_derivative() {
 
 
 #[test]
+//Test vital forward propagation in NN
 fn test_forward_shape() {
    let nn = NeuralNetwork::new(4, 5, 3, 2, 0.1);
    let input = array![[0.1, 0.2, 0.3, 0.4]];

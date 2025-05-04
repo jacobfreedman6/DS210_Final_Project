@@ -2,6 +2,8 @@ use ndarray::Array2;
 use csv::ReaderBuilder;
 use std::error::Error;
 
+
+//Function for loading the CSV data into main
 pub fn load_data(path: &str) -> Result<(Array2<f32>, Vec<usize>), Box<dyn Error>> {
   let mut rdr = ReaderBuilder::new()
       .has_headers(true)
@@ -51,9 +53,5 @@ pub fn load_data(path: &str) -> Result<(Array2<f32>, Vec<usize>), Box<dyn Error>
   let features = Array2::from_shape_vec((labels.len(), num_features), inputs)?;
   Ok((features, labels))
 }
-
-
-
-
 
 
